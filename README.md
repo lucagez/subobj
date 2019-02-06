@@ -1,4 +1,6 @@
 <p align="center">
+  <img src="media/subobj_logo.png" alt="subobj" height="250px" />
+  <br>
   <a href="https://travis-ci.org/lucagez/subobj"><img src="https://travis-ci.com/lucagez/subobj.svg?branch=master" alt="travis"></a>
   <a href="https://www.npmjs.org/package/subobj"><img src="https://img.shields.io/npm/v/subobj.svg?style=flat" alt="npm"></a>
   <img src="https://img.shields.io/badge/license-MIT-f1c40f.svg" alt="MIT">
