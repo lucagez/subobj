@@ -2,18 +2,26 @@
   "name": "subobj",
   "version": "0.0.1",
   "description": "Tiny sub-JSON extractor",
-  "main": "index.js",
+  "main": "dist/subobj.js",
+  "umd:main": "dist/subobj.umd.js",
+  "module": "dist/subobj.mjs",
+  "source": "src/subobj.js",
+  "scripts": {
+    "build": "microbundle src/subobj.js --no-sourcemap",
+    "dev": "microbundle watch src/subobj.js",
+    "test": "mocha test/"
+  },
   "dependencies": {},
   "devDependencies": {
     "eslint": "^5.13.0",
     "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.0.0",
     "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-mocha": "^5.2.1",
     "eslint-plugin-prettier": "^3.0.1",
     "microbundle": "^0.9.0",
+    "mocha": "^5.2.0",
     "prettier": "^1.16.4"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
