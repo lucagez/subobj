@@ -1,0 +1,21 @@
+{
+  "name": "subobj",
+  "version": "0.0.1",
+  "description": "Tiny sub-JSON extractor",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/lucagez/subobj.git"
+  },
+  "author": "Luca Gesmundo <lucagesmundo@yahoo.it>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lucagez/subobj/issues"
+  },
+  "homepage": "https://github.com/lucagez/subobj#readme"
+}
