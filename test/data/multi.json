@@ -1,0 +1,18 @@
+{
+  "ciao": 1,
+  "Articoli": {
+    "Accessori per gattaiole": 1,
+    "Accessori per lettini per animali domestici": 1,
+    "Accessori per tappetini riscaldanti per animali domestici": 1,
+    "Accessori per trasportini e gabbie per animali domestici": 1,
+    "Articoli anfibi e rettili": {
+      "ciao": 2,
+      "Accessori habitat rettili e anfibi": 1,
+      "Cibo per rettili e anfibi": 1,
+      "Habitat rettili e anfibi": 1,
+      "Riscaldamento/illuminazione habitat rettili e anfibi": 1,
+      "Substrati rettili e anfibi": 1
+    },
+    "ciao": 3
+  }
+}

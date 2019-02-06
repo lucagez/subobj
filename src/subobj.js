@@ -21,9 +21,10 @@ const minify = string => {
 
 const find = (string, regex) => {
   try {
-    const { index } = string.match(regex);
+    const { index } = string.match(regex.first);
+    console.log(string.match(regex.first));
     return string.substr(index);
-  } catch(e) {
+  } catch (e) {
     throw new Error('Property not found');
   }
 };
@@ -51,7 +52,10 @@ const subobj = (string, search, params = {}) => {
   const raw = pathMode ? fs.readFileSync(string, 'UTF-8') : string;
   if (validate) isValid(raw);
   const data = isFormatted(raw) ? minify(raw) : raw;
-  const regex = new RegExp(`"${search}":`);
+  const regex = {
+    global: new RegExp(`"${search}":`, 'g'),
+    first: new RegExp(`"${search}":`)
+  };
   const substr = find(data, regex);
   return `{${parse(substr)}}`;
 };

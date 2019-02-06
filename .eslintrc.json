@@ -18,6 +18,7 @@
 		"mocha/no-exclusive-tests": "error",
 		"no-param-reassign": "off",
 		"consistent-return": "off",
-		"no-return-assign": "off"
+		"no-return-assign": "off",
+		"no-cond-assign": "off"
 	}
 }
