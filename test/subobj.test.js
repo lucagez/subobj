@@ -59,4 +59,22 @@ describe('subobj', () => {
     const obj = JSON.parse(sub);
     assert.equal(typeof obj, 'object');
   });
+
+  it('should return an array containing every subobject found', () => {
+    const multi = fs.readFileSync(`${__dirname}/data/multi.json`, 'UTF-8');
+    const subs = subobj(multi, 'ciao');
+    const objs = subs.map(e => JSON.parse(e));
+    objs.forEach(e => {
+      expect(e).to.be.an('object');
+    });
+  });
+
+  it('should return an array containing every subobject found, given an increased complexity of objects', () => {
+    const multi = fs.readFileSync(`${__dirname}/data/multi_complex.json`, 'UTF-8');
+    const subs = subobj(multi, 'Abbigliamento');
+    const objs = subs.map(e => JSON.parse(e));
+    objs.forEach(e => {
+      expect(e).to.be.an('object');
+    });
+  });
 });
