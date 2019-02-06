@@ -1,6 +1,6 @@
 {
   "name": "subobj",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Tiny sub-JSON extractor",
   "main": "dist/subobj.js",
   "umd:main": "dist/subobj.umd.js",
@@ -30,6 +30,7 @@
     "url": "git+ssh://git@github.com/lucagez/subobj.git"
   },
   "author": "Luca Gesmundo <lucagesmundo@yahoo.it>",
+  "keywords": ["JSON", "JSON manipulation", "extraction", "object manipulation"],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/lucagez/subobj/issues"
