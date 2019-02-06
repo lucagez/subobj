@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const isFormatted = string => string.match('\n');
+const isFormatted = string => (string.match('\n') || []).length > 0;
 
 const isValid = string => {
   try {
@@ -19,14 +19,14 @@ const minify = string => {
   }
 };
 
-const find = (string, regex) => {
-  try {
-    const { index } = string.match(regex.first);
-    console.log(string.match(regex.first));
-    return string.substr(index);
-  } catch (e) {
-    throw new Error('Property not found');
+const find = (string, search) => {
+  const regex = RegExp(`"${search}":`, 'g');
+  const accumulator = [];
+  let temp;
+  while ((temp = regex.exec(string)) !== null) {
+    accumulator.push(temp.index);
   }
+  return accumulator;
 };
 
 const matchBracket = (string, index, brackets, counter = 0) => {
@@ -52,12 +52,11 @@ const subobj = (string, search, params = {}) => {
   const raw = pathMode ? fs.readFileSync(string, 'UTF-8') : string;
   if (validate) isValid(raw);
   const data = isFormatted(raw) ? minify(raw) : raw;
-  const regex = {
-    global: new RegExp(`"${search}":`, 'g'),
-    first: new RegExp(`"${search}":`)
-  };
-  const substr = find(data, regex);
-  return `{${parse(substr)}}`;
+  const matches = find(data, search);
+  return matches.map(index => {
+    const substr = data.substr(index);
+    return `{${parse(substr)}}`;
+  });
 };
 
 module.exports = subobj;
