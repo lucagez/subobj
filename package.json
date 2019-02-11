@@ -30,7 +30,12 @@
     "url": "git+ssh://git@github.com/lucagez/subobj.git"
   },
   "author": "Luca Gesmundo <lucagesmundo@yahoo.it>",
-  "keywords": ["JSON", "JSON manipulation", "extraction", "object manipulation"],
+  "keywords": [
+    "JSON",
+    "JSON manipulation",
+    "extraction",
+    "object manipulation"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/lucagez/subobj/issues"
