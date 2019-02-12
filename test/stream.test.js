@@ -3,7 +3,11 @@
 const fs = require('fs');
 const subobj = require('../dist/subobj');
 
-const path = `${__dirname}/data/google_taxonomy.json`;
+// complex structure but small file
+// const path = `${__dirname}/data/google_taxonomy.json`;
+
+// test with BIG file
+const path = `${__dirname}/data/citylots.json`;
 
 const store = {
   overlap: '',
@@ -12,7 +16,8 @@ const store = {
 
 // test term for overlapping test (object on two different chunks)
 // const term = 'Cambio pannolini';
-const term = 'Articoli';
+const term = 'BLKLOT';
+let chunkCounter = 0;
 
 // init
 const find = (string, search) => {
@@ -65,10 +70,11 @@ const parse = (string, len, index = 0) => {
 
 // test time
 const t = Date.now();
-const stream = fs.createReadStream(path);
+const stream = fs.createReadStream(path, { highWaterMark: 8192 * 1024 });
 
 stream.on('data', data => {
-  console.log('\n ######################## \n');
+  chunkCounter += 1;
+  // console.log('\n ######################## \n');
 
   // returning a string that is equal to the actual chunk plus the optional
   // overlap found in previous `data` iteration
@@ -78,7 +84,7 @@ stream.on('data', data => {
   const len = string.length;
   const cut = len - `"${term}":`.length - 1;
   store.overlap = string.substr(cut);
-  console.log(string.substr(0, 20));
+  // console.log(string.substr(0, 20));
 
   const indexes = find(string, term);
   indexes.forEach(i => {
@@ -89,16 +95,17 @@ stream.on('data', data => {
     store.overlapOBJ = !extract.end ? extract.string : '';
 
     // modify flow to return only completed strings
-    console.log(parse(substr, len));
+    // console.log(parse(substr, len));
   });
 });
 
 stream.on('end', () => {
   console.log('stream:', Date.now() - t);
+  console.log('Data divided in', chunkCounter);
 });
 
 // in memory test
-const t1 = Date.now();
-const data = fs.readFileSync(path, 'UTF-8');
-subobj(data, term);
-console.log('in memory:', Date.now() - t1);
+// const t1 = Date.now();
+// const data = fs.readFileSync(path, 'UTF-8');
+// subobj(data, term);
+// console.log('in memory:', Date.now() - t1);
