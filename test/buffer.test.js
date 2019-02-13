@@ -7,9 +7,9 @@ const open = util.promisify(fs.open);
 const read = util.promisify(fs.read);
 const close = util.promisify(fs.close);
 
-const path = `${__dirname}/data/google_taxonomy.json`;
+// const path = `${__dirname}/data/google_taxonomy.json`;
 // const path = `${__dirname}/data/citylots.json`;
-// const path = `${__dirname}/data/huge.json`;
+const path = `${__dirname}/data/huge.json`;
 
 const store = {
   overlap: '',
@@ -83,15 +83,14 @@ const find = (buffer, search) => {
         index = 0;
         const start = i - target + 1;
         // acc.push(i - target + 1);
-        console.log('found');
-        acc.push(parse(buffer, len, start));
+        // console.log('found');
+        // acc.push(parse(buffer, len, start));
       };
     } else {
       index = 0;
     }
     i += 1;
   }
-  // console.log(occ);
   return {
     acc,
     occ
@@ -99,7 +98,7 @@ const find = (buffer, search) => {
 }
 
 (async () => {
-  const search = 'Articolizzini';
+  const search = 'type';
   const term = `"${search}":`;
 
   const t = Date.now();
@@ -112,18 +111,15 @@ const find = (buffer, search) => {
   let counter = 0;
   for(;;) {
     const data = await read(f, buffer, 0, bsize, i * chunk);
-    
-    // console.log(data.buffer[3]);
-    // console.log(data.buffer[18]);
-    // await forro(data.buffer);
 
     // const search = 0;
     // const index = data.buffer.indexOf(search);
     if (data.buffer.indexOf(term) !== -1) {
-      const found = find(data.buffer, term).acc;
+      const found = find(data.buffer, term);
       // console.log(found);
       // find(data.buffer, term);
-      // counter += found.occ;
+      counter += found.occ;
+      // console.log(found.occ);
     }
 
     if (data.bytesRead !== bsize) break;
