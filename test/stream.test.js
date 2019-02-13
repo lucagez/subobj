@@ -8,10 +8,10 @@ const subobj = require('../dist/subobj');
 // const path = `${__dirname}/data/multi_complex.json`;
 
 // test with BIG file
-const path = `${__dirname}/data/citylots.json`;
+// const path = `${__dirname}/data/citylots.json`;
 
 // test with HUGE file
-// const path = `${__dirname}/data/huge.json`;
+const path = `${__dirname}/data/huge.json`;
 
 const store = {
   overlap: '',
@@ -109,36 +109,37 @@ const stream = fs.createReadStream(path, { highWaterMark: 8192 * 1024, encoding:
 
 stream.on('data', data => {
   chunkCounter += 1;
-  // console.log('\n ######################## \n');
+  // console.log(data);
+  // // console.log('\n ######################## \n');
 
-  // returning a string that is equal to the actual chunk plus the optional
-  // overlap found in previous `data` iteration
-  const string = (store.overlapOBJ !== '' ? store.overlapOBJ : store.overlap) + data.toString();
+  // // returning a string that is equal to the actual chunk plus the optional
+  // // overlap found in previous `data` iteration
+  // const string = (store.overlapOBJ !== '' ? store.overlapOBJ : store.overlap) + data.toString();
 
-  // overlapping
-  const len = string.length;
-  const cut = len - `"${term}":`.length - 1;
-  store.overlap = string.substr(cut);
-  // console.log(string.substr(0, 20));
+  // // overlapping
+  // const len = string.length;
+  // const cut = len - `"${term}":`.length - 1;
+  // store.overlap = string.substr(cut);
+  // // console.log(string.substr(0, 20));
 
-  const indexes = find(string, term);
-  indexes.forEach(i => {
-    const substr = string.substr(i);
-    const extract = forParse(substr, len);
+  // const indexes = find(string, term);
+  // indexes.forEach(i => {
+  //   const substr = string.substr(i);
+  //   const extract = forParse(substr, len);
 
-    // updating global store to contain overlapping objects across chunks
-    store.overlapOBJ = !extract.end ? extract.string : '';
-    if (extract.end) console.log(extract.string);
-    // modify flow to return only completed strings
-    // console.log(parse(substr, len));
-  });
+  //   // updating global store to contain overlapping objects across chunks
+  //   store.overlapOBJ = !extract.end ? extract.string : '';
+  //   if (extract.end) console.log(extract.string);
+  //   // modify flow to return only completed strings
+  //   // console.log(parse(substr, len));
+  // });
 });
 
 stream.on('end', () => {
   console.log('stream:', Date.now() - t);
-  console.log('Data divided in', chunkCounter);
-  const mem = process.memoryUsage().heapUsed / 1024 / 1024;
-  console.log(`The script uses approximately ${mem.toFixed(1)} MB`);
+  // console.log('Data divided in', chunkCounter);
+  // const mem = process.memoryUsage().heapUsed / 1024 / 1024;
+  // console.log(`The script uses approximately ${mem.toFixed(1)} MB`);
 });
 
 // in memory test
