@@ -5,8 +5,8 @@ const open = util.promisify(fs.open);
 const read = util.promisify(fs.read);
 const close = util.promisify(fs.close);
 
-const path = `${__dirname}/data/google_taxonomy.json`;
-// const path = `${__dirname}/data/citylots.json`;
+// const path = `${__dirname}/data/google_taxonomy.json`;
+const path = `${__dirname}/data/citylots.json`;
 // const path = `${__dirname}/data/huge.json`;
 
 const forro = data => {
@@ -52,7 +52,7 @@ const find = (buffer, search) => {
 }
 
 (async () => {
-  const search = 'Accessori batteria';
+  const search = 'BLKLOT';
   const term = `"${search}":`;
 
   const t = Date.now();
