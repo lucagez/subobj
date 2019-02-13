@@ -1,3 +1,5 @@
+// There is a bug in the parser function that prevent to return the correct string
+
 const util = require('util');
 const fs = require('fs');
 
@@ -5,19 +7,61 @@ const open = util.promisify(fs.open);
 const read = util.promisify(fs.read);
 const close = util.promisify(fs.close);
 
-// const path = `${__dirname}/data/google_taxonomy.json`;
-const path = `${__dirname}/data/citylots.json`;
+const path = `${__dirname}/data/google_taxonomy.json`;
+// const path = `${__dirname}/data/citylots.json`;
 // const path = `${__dirname}/data/huge.json`;
 
-const forro = data => {
-  return new Promise((resolve, reject) => {
-    for (const byte of data) {
-      // if (byte === 65) a = 'A';
+const store = {
+  overlap: '',
+  overlapOBJ: ''
+};
+
+// preferring for-loop over recursion to avoid `max call stack size exceeded error`
+const matchBracket = (buffer, len, brackets) => {
+  let counter = 0;
+  let index = 0;
+  let flag = false;
+  // eslint-disable-next-line no-restricted-syntax
+  for (const char of buffer) {
+    if (char === brackets[0]) {
+      counter += 1;
+      flag = true;
+    } else if (char === brackets[1]) counter -= 1;
+    if (counter === 0) if (flag) break;
+    index += 1;
+  }
+
+  return {
+    end: counter === 0,
+    index
+  };
+};
+
+const parse = (buffer, len, start) => {
+  let index = start;
+  let parsed = {};
+  for (; index < len;) {
+    const current = buffer[index];
+    if (current === 44 || current === 125) {
+      parsed = { end: true, string: buffer.toString('utf8', start, index) };
+      break;
+    };
+    if (current === 91 || current === 123) {
+      const brackets = current === 91 ? [91, 93] : [123, 125];
+      const matchedIndex = matchBracket(buffer, len, brackets);
+      const sub = buffer.toString('utf8', start, matchedIndex.index);
+      // postponing a bracket if the match is complete
+      parsed = {
+        end: matchedIndex.end,
+        string: sub + (matchedIndex.end ? brackets[1] : '')
+      };
+      break;
     }
-    // console.log('yeah')
-    resolve('ciao');
-  });
-}
+    index += 1;
+  }
+  if (!parsed.end) parsed = { end: false, string: buffer.toString('utf8', start, len) };
+  return parsed;
+};
 
 const find = (buffer, search) => {
   const searchArr = search.split('').map(e => e.charCodeAt(0));
@@ -37,7 +81,10 @@ const find = (buffer, search) => {
       if (index === target) {
         occ += 1;
         index = 0;
-        acc.push(i - target + 1);
+        const start = i - target + 1;
+        // acc.push(i - target + 1);
+        console.log('found');
+        acc.push(parse(buffer, len, start));
       };
     } else {
       index = 0;
@@ -52,7 +99,7 @@ const find = (buffer, search) => {
 }
 
 (async () => {
-  const search = 'BLKLOT';
+  const search = 'Articolizzini';
   const term = `"${search}":`;
 
   const t = Date.now();
@@ -73,14 +120,10 @@ const find = (buffer, search) => {
     // const search = 0;
     // const index = data.buffer.indexOf(search);
     if (data.buffer.indexOf(term) !== -1) {
-      const found = find(data.buffer, term);
-      counter += found.occ;
-      console.log(found.acc);
-      console.log(data.buffer[found.acc[0]])
-      console.log(data.buffer[found.acc[0] + 1])
-      console.log(data.buffer[found.acc[0] + 2])
-      console.log(data.buffer[found.acc[0] + 3])
-      console.log(data.buffer[found.acc[0] + 4])
+      const found = find(data.buffer, term).acc;
+      // console.log(found);
+      // find(data.buffer, term);
+      // counter += found.occ;
     }
 
     if (data.bytesRead !== bsize) break;
