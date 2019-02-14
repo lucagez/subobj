@@ -8,6 +8,7 @@ const numCPUs = require('os').cpus().length;
 const open = util.promisify(fs.open);
 const read = util.promisify(fs.read);
 const close = util.promisify(fs.close);
+const write = fs.createWriteStream('out.json');
 
 // Available test datasets
 // const path = `${__dirname}/data/google_taxonomy.json`;
@@ -20,6 +21,67 @@ const parsePromise = index => {
   return new Promise((resolve, reject) => {
     resolve(`ciao ${index}`);
   });
+};
+
+const parseWithout = async index => {
+  return 'ciao';
+};
+
+// ############  PARSER  ############
+// preferring for-loop over recursion to avoid `max call stack size exceeded error`
+const matchBracket = (buffer, len, start, brackets) => {
+  let index = start;
+  let counter = 0;
+  let flag = false;
+  // eslint-disable-next-line no-restricted-syntax
+  for (;;) {
+    const current = buffer[index];
+    if (current === brackets[0]) {
+      counter += 1;
+      flag = true;
+    } else if (current === brackets[1]) {
+      counter -= 1;
+      if (counter === 0) if (flag) break;
+    }
+    index += 1;
+  }
+
+  return {
+    end: counter === 0,
+    index
+  };
+};
+
+const parse = (buffer, len, start) => {
+  let index = start;
+  let parsed = {};
+  for (;;) {
+    const current = buffer[index];
+    if (index === len) break;
+    // 44: `comma`, 125: `}`
+    if (current === 44 || current === 125) {
+      parsed = { end: true, string: '{' + buffer.toString('utf8', start, index) + '}' };
+      break;
+    }
+    // 91: `[`, 123: `{`
+    if (current === 91 || current === 123) {
+      // brackets = [`[`, `]`] or [`{`, `}`]
+
+      const brackets = current === 91 ? [91, 93] : [123, 125];
+      const matchedIndex = matchBracket(buffer, len, start, brackets);
+      const sub = buffer.toString('utf8', start, matchedIndex.index);
+      // postponing a bracket if the match is complete
+      parsed = {
+        end: matchedIndex.end,
+        string: '{' + sub + (matchedIndex.end ? String.fromCharCode(brackets[1]) : '') + '}'
+      };
+      break;
+    }
+    index += 1;
+  }
+  if (!parsed.end) parsed = { end: false, string: '{' + buffer.toString('utf8', start, len) + '}' };
+
+  return parsed;
 };
 
 const find = (buffer, search) => {
@@ -37,9 +99,12 @@ const find = (buffer, search) => {
       if (sIndex === target) {
         sIndex = 0;
         const start = i - target + 1;
-        accumulator.push(start);
+        // accumulator.push(start);
+        accumulator.push(parse(buffer, len, start));
 
-        promises.push(parsePromise(start));
+        // parse(buffer, len, start);
+        // promises.push(parsePromise(start));
+        // parseWithout(start);
       }
     } else {
       sIndex = 0;
@@ -52,9 +117,9 @@ const find = (buffer, search) => {
 // const findINDEXOF = (buffer, search) => {
 //   const matches = [];
 //   let lastMatch;
-//   // Equivalent to for solution
-//   // while ((lastMatch = buffer.indexOf(searchStr, lastMatch + searchStr.length)) != -1) {
-//   //   matches.push(lastMatch);
+//   // Equivalent to for solutionGEZ
+//   // while ((lastMatch = bufferGEZastMatch + searchStr.length)) != -1) {
+//   //   matches.push(lastMatch);GEZ
 //   // }
 //   for (;;) {
 //     lastMatch = buffer.indexOf(search, lastMatch + search.length);
@@ -84,6 +149,7 @@ const find = (buffer, search) => {
   const buffer = Buffer.alloc(bsize);
 
   const f = await open(path, 'r');
+  write.write('[');
 
   let i = 0;
   for (;;) {
@@ -92,8 +158,12 @@ const find = (buffer, search) => {
     // If search term is found inside analized buffer..
     const firstMatch = data.buffer.indexOf(searchStr);
     if (firstMatch !== -1) {
-      const matches = find(data.buffer, searchArr);
+      const matches = find(data.buffer, searchArr)
+        .filter(e => e.end === true)
+        .forEach(e => write.write(e.string));
 
+      // console.log(matches.length);
+      // console.log(matches.filter(e => e.end === true).map(e => JSON.parse(e.string)));
       // test with promises
       // promises = [];
       // async parse => Promise.all()
@@ -120,6 +190,8 @@ const find = (buffer, search) => {
     i += 1;
   }
   await close(f);
+  write.write(']');
+  write.end();
   console.log(numCPUs);
 
   // ############  STATS  ############
