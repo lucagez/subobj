@@ -2,7 +2,7 @@
 
 const util = require('util');
 const fs = require('fs');
-const numCPUs = require('os').cpus().length;
+// const numCPUs = require('os').cpus().length;
 
 // file interactions
 const open = util.promisify(fs.open);
@@ -12,20 +12,8 @@ const write = fs.createWriteStream('out.json');
 
 // Available test datasets
 // const path = `${__dirname}/data/google_taxonomy.json`;
-// const path = `${__dirname}/data/citylots.json`;
-const path = `${__dirname}/data/huge.json`;
-
-// ############  UTILS  ############
-let promises = [];
-const parsePromise = index => {
-  return new Promise((resolve, reject) => {
-    resolve(`ciao ${index}`);
-  });
-};
-
-const parseWithout = async index => {
-  return 'ciao';
-};
+const path = `${__dirname}/data/citylots.json`;
+// const path = `${__dirname}/data/huge.json`;
 
 // ############  PARSER  ############
 // preferring for-loop over recursion to avoid `max call stack size exceeded error`
@@ -33,7 +21,6 @@ const matchBracket = (buffer, len, start, brackets) => {
   let index = start;
   let counter = 0;
   let flag = false;
-  // eslint-disable-next-line no-restricted-syntax
   for (;;) {
     const current = buffer[index];
     if (current === brackets[0]) {
@@ -66,7 +53,6 @@ const parse = (buffer, len, start) => {
     // 91: `[`, 123: `{`
     if (current === 91 || current === 123) {
       // brackets = [`[`, `]`] or [`{`, `}`]
-
       const brackets = current === 91 ? [91, 93] : [123, 125];
       const matchedIndex = matchBracket(buffer, len, start, brackets);
       const sub = buffer.toString('utf8', start, matchedIndex.index);
@@ -99,12 +85,8 @@ const find = (buffer, search) => {
       if (sIndex === target) {
         sIndex = 0;
         const start = i - target + 1;
-        // accumulator.push(start);
-        accumulator.push(parse(buffer, len, start));
 
-        // parse(buffer, len, start);
-        // promises.push(parsePromise(start));
-        // parseWithout(start);
+        accumulator.push(parse(buffer, len, start));
       }
     } else {
       sIndex = 0;
@@ -156,29 +138,9 @@ const find = (buffer, search) => {
     const data = await read(f, buffer, 0, bsize, i * chunk);
 
     // If search term is found inside analized buffer..
+    let matches;
     const firstMatch = data.buffer.indexOf(searchStr);
-    if (firstMatch !== -1) {
-      const matches = find(data.buffer, searchArr)
-        .filter(e => e.end === true)
-        .forEach(e => write.write(e.string));
-
-      // console.log(matches.length);
-      // console.log(matches.filter(e => e.end === true).map(e => JSON.parse(e.string)));
-      // test with promises
-      // promises = [];
-      // async parse => Promise.all()
-      // let extractions = [];
-      // let j = 0;
-      // for (;;) {
-      //   promises.push(doSomethingAsync(matches[j]));
-      //   j += 1;
-      // }
-      // await Promise.all(promises);
-
-      // const extractions = matches.map(match => parse(match));
-      // Promise.all(extractions).then(data => data);
-      // return;
-    }
+    if (firstMatch !== -1) matches = find(data.buffer, searchArr).filter(e => e.end === true);
 
     // Using indexOF method
     // const matches = findINDEXOF(data.buffer, searchStr);
@@ -186,13 +148,21 @@ const find = (buffer, search) => {
 
     // The following condition is met at the last buffer that gets read
     // as its length will be minor of each previous buffer
-    if (data.bytesRead !== bsize) break;
+    if (data.bytesRead !== bsize) {
+      const len = matches.length;
+      matches.forEach((e, j) => {
+        const string = len === j + 1 ? e.string : e.string + ',';
+        write.write(string);
+      });
+      break;
+    } else {
+      matches.forEach(e => write.write(e.string + ','));
+    }
     i += 1;
   }
   await close(f);
   write.write(']');
   write.end();
-  console.log(numCPUs);
 
   // ############  STATS  ############
   // Printing memory usage

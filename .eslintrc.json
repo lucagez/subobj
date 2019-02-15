@@ -20,6 +20,8 @@
 		"no-param-reassign": "off",
 		"consistent-return": "off",
 		"no-return-assign": "off",
-		"no-cond-assign": "off"
+		"no-cond-assign": "off",
+		"prefer-template":"off",
+		"no-await-in-loop": "off"
 	}
 }
