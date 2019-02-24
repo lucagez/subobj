@@ -18,8 +18,7 @@
 npm install --save subjson
 ```
 
-You can also embed subjson in a webpage:
-<a href="https://unpkg.com/tattica@0.1.0/dist/subobj.umd.js">https://unpkg.com/tattica@0.1.0/dist/subobj.umd.js</a>
+You can also embed subobj in a webpage.
 
 **note:** the `pathMode` will not work in a browser environment as it relies on `fs`.
 
