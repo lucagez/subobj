@@ -2,7 +2,6 @@
 
 const util = require('util');
 const fs = require('fs');
-// const numCPUs = require('os').cpus().length;
 
 // file interactions
 const open = util.promisify(fs.open);
@@ -39,21 +38,23 @@ const matchBracket = (buffer, len, start, brackets) => {
   };
 };
 
-const parse = (buffer, len, start) => {
+const parse = (buffer, len, start, ids) => {
+  // for HUMANS
+  // ids => [',', '{', '}', '[', ']']
   let index = start;
   let parsed = {};
   for (;;) {
     const current = buffer[index];
     if (index === len) break;
     // 44: `comma`, 125: `}`
-    if (current === 44 || current === 125) {
+    if (current === ids[0] || current === ids[2]) {
       parsed = { end: true, string: '{' + buffer.toString('utf8', start, index) + '}' };
       break;
     }
     // 91: `[`, 123: `{`
-    if (current === 91 || current === 123) {
+    if (current === ids[3] || current === ids[2]) {
       // brackets = [`[`, `]`] or [`{`, `}`]
-      const brackets = current === 91 ? [91, 93] : [123, 125];
+      const brackets = current === ids[3] ? [ids[3], ids[4]] : [ids[1], ids[2]];
       const matchedIndex = matchBracket(buffer, len, start, brackets);
       const sub = buffer.toString('utf8', start, matchedIndex.index);
       // postponing a bracket if the match is complete
@@ -70,7 +71,7 @@ const parse = (buffer, len, start) => {
   return parsed;
 };
 
-const find = (buffer, search) => {
+const find = (buffer, search, identifiers) => {
   const target = search.length;
   const len = buffer.length;
   let sIndex = 0;
@@ -86,7 +87,7 @@ const find = (buffer, search) => {
         sIndex = 0;
         const start = i - target + 1;
 
-        accumulator.push(parse(buffer, len, start));
+        accumulator.push(parse(buffer, len, start, identifiers));
       }
     } else {
       sIndex = 0;
@@ -119,6 +120,19 @@ const find = (buffer, search) => {
   const searchStr = `"${search}":`;
   const searchArr = searchStr.split('').map(e => e.charCodeAt(0));
 
+  const params = { streamMode: true };
+
+  const identifiers = {
+    comma: [',', 44],
+    oCurly: ['{', 123],
+    cCurly: ['}', 125],
+    oSquare: ['[', 91],
+    cSquare: [']', 93]
+  };
+  const usedIdentifiers = Object.keys(identifiers).map(e =>
+    params.streamMode ? identifiers[e][1] : identifiers[e][0]
+  );
+
   // Init execution time
   const t = Date.now();
 
@@ -140,7 +154,8 @@ const find = (buffer, search) => {
     // If search term is found inside analized buffer..
     let matches;
     const firstMatch = data.buffer.indexOf(searchStr);
-    if (firstMatch !== -1) matches = find(data.buffer, searchArr).filter(e => e.end === true);
+    if (firstMatch !== -1)
+      matches = find(data.buffer, searchArr, usedIdentifiers).filter(e => e.end === true);
 
     // Using indexOF method
     // const matches = findINDEXOF(data.buffer, searchStr);

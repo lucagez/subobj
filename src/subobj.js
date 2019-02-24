@@ -37,7 +37,7 @@ const matchBracket = (string, index, brackets, counter = 0) => {
   return matchBracket(string, (index += 1), brackets, counter);
 };
 
-const parse = (string, index = 0) => {
+const parse = (string, identifiers, index = 0) => {
   const current = string.charAt(index);
   if (current === ',' || current === '}') return string.substr(0, index);
   if (current === '[' || current === '{') {
@@ -48,6 +48,16 @@ const parse = (string, index = 0) => {
 };
 
 const subobj = (string, search, params = {}) => {
+  const identifiers = {
+    comma: [',', 44],
+    oCurly: ['{', 123],
+    cCurly: ['}', 125],
+    oSquare: ['[', 91],
+    cSquare: [']', 93]
+  };
+  const usedIdentifiers = Object.keys(identifiers).map(e =>
+    params.streamMode ? identifiers[e][1] : identifiers[e][0]
+  );
   const { pathMode, validate } = params;
   const raw = pathMode ? fs.readFileSync(string, 'UTF-8') : string;
   if (validate) isValid(raw);
